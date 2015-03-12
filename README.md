@@ -16,7 +16,7 @@ Server Stack
 Platform: Web
 Operation System: Linux
 Framework: node.js
-Database: TBD
+Database: PostgreSQL
 
 Clients
 ---------------------------------
