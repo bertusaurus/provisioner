@@ -1,0 +1,216 @@
+.menu {
+	position: absolute;
+	height: 200px;
+	width: 256px;
+	margin: auto;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+.menu-item {
+	width: 256px;
+	height: 64px;
+	margin-bottom: 40px;
+	background-color: rgb(190, 202, 223);
+}
+
+.menu-item:active {
+	background-color: #80B5DF;
+}
+
+.menu-item p {
+	height: 100%;
+	line-height: 64px;
+}
+
+.grid {
+	width: 100%;
+	display: none;
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+.grid-icon {
+	width: 128px;
+	height: 128px;
+	display: inline-block;
+	margin: 40px 0 0 40px;
+}
+
+.grid-icon, .grid-back, .form-new-submit, .menu-item, .action-button {
+	position: relative;
+	border: 2px solid #000;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.grid-icon:active, .grid-back:active, .form-new-submit:active, .menu-item:active {
+	color: #fff;
+}
+
+.grid-icon:active {
+	background-color: #80B5DF;
+}
+
+.grid-back:active {
+	background-color: #FC3939;
+}
+
+.form-new-submit:active, .action-button:active {
+	background-color: #3CDB3C;
+}
+
+.grid-icon p, .grid-back p, .form-new-submit p, .menu-item p {
+	position: absolute;
+	width: 100%;
+	font-size: 14px;
+	text-align: center;
+	margin-top: -2px;
+}
+
+.action-button {
+	font-size: 14px;
+	text-align: center;
+	margin-top: -2px;
+	height: 32px;
+	line-height: 29px;
+	background-color: rgb(197, 223, 190);
+	width: 110px;
+}
+
+.grid-icon p {
+	height: 100%;
+	line-height: 128px;
+}
+
+.grid-back-container {
+	height: 64px;
+	padding: 20px;
+	margin: 0 auto;
+	max-width: 900px;
+}
+
+.grid-back {
+	display: block;
+	height: 64px;
+	background-color: rgb(223, 190, 190);
+	margin: 0 20px;
+}
+
+.grid-back p {
+	height: 100%;
+	line-height: 64px;		
+}
+
+form.form-new {
+	display: none;
+	max-width: 400px;
+	margin: 40px auto;
+}
+
+.form-new h4 {
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+.form-new-submit {
+	height: 64px;
+	background-color: rgb(197, 223, 190);
+}
+
+.form-new-submit p {
+	height: 100%;
+	line-height: 64px;
+}
+
+.form-new .entry-field {
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+.entry-field label {
+	float: left;
+	display: block;
+	min-width: 100px;
+	margin-right: 20px;
+}
+
+.entry-field-input {
+	overflow: hidden;
+}
+
+.entry-field input, select {
+	display: block;
+	width: 100%;
+}
+
+.time-input {
+	margin-bottom: 10px;
+}
+
+.time-input label {
+	min-width: 55px !important;
+	margin-right: 10px !important;
+}
+
+.time-input div {
+	overflow: hidden;
+}
+
+.checkbox-input {
+	border: 1px solid #000;
+	height: 32px;
+	border-radius: 6px;
+}
+
+.checkbox-input.checked {
+	background-color: rgb(190, 202, 223);
+}
+
+.checkbox-input.checked:active {
+	background-color: #80B5DF;
+}
+
+section.list {
+	width: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 20px 40px;
+	display: none;
+}
+
+.list table {
+	width: 100%;
+	margin: 0 auto;
+}
+
+.list td, .list th {
+	padding: 10px 0;
+}
+
+.list table tr td:first-child {
+	width: 25%;
+}
+
+.list table tr td:nth-child(2) {
+	width: 15%;
+}
+
+.list table tr td:nth-child(3) {
+	width: 45%;
+}
+
+.list table tr td:nth-child(4),
+.list table tr td:nth-child(5) {
+	min-width: 120px;
+}
+
+.list tr.expired {
+	background-color: rgb(223, 190, 190);
+}
+
+.list td:first-child, .list th:first-child {
+	padding: 0 0 0 10px;
+}
