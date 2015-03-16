@@ -39,14 +39,14 @@
 	margin: 40px 0 0 40px;
 }
 
-.grid-icon, .grid-back, .form-new-submit, .menu-item, .action-button {
+.grid-icon, .grid-back, .entry-form-submit, .menu-item, .action-button {
 	position: relative;
 	border: 2px solid #000;
 	border-radius: 6px;
 	cursor: pointer;
 }
 
-.grid-icon:active, .grid-back:active, .form-new-submit:active, .menu-item:active {
+.grid-icon:active, .grid-back:active, .entry-form-submit:active, .menu-item:active {
 	color: #fff;
 }
 
@@ -58,11 +58,11 @@
 	background-color: #FC3939;
 }
 
-.form-new-submit:active, .action-button:active {
+.entry-form-submit:active, .action-button:active {
 	background-color: #3CDB3C;
 }
 
-.grid-icon p, .grid-back p, .form-new-submit p, .menu-item p {
+.grid-icon p, .grid-back p, .entry-form-submit p, .menu-item p {
 	position: absolute;
 	width: 100%;
 	font-size: 14px;
@@ -104,28 +104,28 @@
 	line-height: 64px;		
 }
 
-form.form-new {
+form.entry-form {
 	display: none;
 	max-width: 400px;
 	margin: 40px auto;
 }
 
-.form-new h4 {
+.entry-form h4 {
 	margin-bottom: 20px;
 	text-align: center;
 }
 
-.form-new-submit {
+.entry-form-submit {
 	height: 64px;
 	background-color: rgb(197, 223, 190);
 }
 
-.form-new-submit p {
+.entry-form-submit p {
 	height: 100%;
 	line-height: 64px;
 }
 
-.form-new .entry-field {
+.entry-form .entry-field {
 	width: 100%;
 	margin-bottom: 20px;
 }

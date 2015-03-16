@@ -1,6 +1,8 @@
 var ItemList = function(element) {
 	return (function() {
 		var _element = element;
+		var _form = new Form($('.entry-form'));
+		var _backButton = new BackButton($('.grid-back-container'));
 
 		function _parseDate(dateString, defaultValue) {
 			if (!dateString) {
@@ -26,8 +28,11 @@ var ItemList = function(element) {
 			hide: function() {
 				_element.hide();
 			},
-			show: function() {
+			show: function(show) {
 				_element.show();
+				if (show) {
+					show();
+				}
 			},
 			refresh: function(allItems) {
 				_element.empty();
@@ -75,7 +80,20 @@ var ItemList = function(element) {
 							row.append($('<td>')
 								.append($('<div>')
 								.addClass('action-button')
-									.append('Modify')));
+									.append('Modify'))
+								.click(function() {
+									_element.hide();
+									var itemModify = new ItemModify({
+										element: $('.item-modify'),
+										item: item,
+										form: _form
+									});
+									_backButton.init('Item List', function() {
+										itemModify.remove();
+										_element.show();
+									});
+									itemModify.show();
+								}));
 							table.append(row);
 						});
 						_element.append(table);

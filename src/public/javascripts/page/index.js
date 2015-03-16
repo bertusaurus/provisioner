@@ -1,5 +1,50 @@
 var Index = (function() {
+	var _pages = (function() {
+		var _stack = [];
+
+		return {
+			pop: function() {
+				if (_stack.length > 0) {
+					var poppable = _stack[_stack.length - 1];
+					poppable.cleanUp();
+					_stack.pop();
+					_stack[_stack.length - 1].init();
+
+					if (_stack.length > 1) {
+						var previous = _stack[_stack.length - 2];
+						previous.initBackButton();	
+					} else {
+						$('.grid-back-container').remove();
+					}
+				}
+			},
+			push: function(page, alternateText) {
+				if (_stack.length > 0) {
+					_stack[_stack.length - 1].cleanUp();
+				}
+				_stack.push(page);
+				page.init();
+				if (_stack.length > 1) {
+					var previous = _stack[_stack.length - 2];
+					if (alternateText) {
+						previous.initBackButton(alternateText);
+					} else {
+						previous.initBackButton();
+					}
+				}
+			},
+			refresh: function() {
+				var current = _stack[_stack.length - 1];
+				current.cleanUp();
+				current.init();
+			}
+		}
+	}());
+
 	var _list;
+	var _form;
+	var _backButton;
+
 
 	var _menu = {
 		element: null,
@@ -11,24 +56,8 @@ var Index = (function() {
 				.click(action)
 				.appendTo(_menu.element);
 		},
-		init: function() {
-			_menu.addButton('Add Items', function() {
-				_menu.element.hide();
-				_grid.element.show();
-				_section.groups.list();
-			});
-			_menu.addButton('List Items', function() {
-				_menu.element.hide();
-				_backButton.init(true, 'Menu', function() {
-					_menu.element.show();
-					_list.hide();
-					_backButton.init(false);
-				});
-				_list.show();
-				API.items.list(function(items) {
-					_list.refresh(items);
-				});
-			});
+		clear: function() {
+			_menu.element.find('.menu-item').remove();
 		}
 	}
 
@@ -43,129 +72,6 @@ var Index = (function() {
 			});
 		}
 	};
-
-	var _backButton = {
-		element: null,
-		init: function(show, text, action) {
-			$('.grid-back-container').remove();
-			if (show) {
-				var container = $('<div>')
-					.addClass('grid-back-container')
-					.prependTo('body');
-				$('<div>')
-					.addClass('grid-back')
-					.append($('<p>')
-						.append('Back to ' + text))
-					.click(action)
-					.appendTo(container);
-				return;
-			}
-		}
-	}
-
-	var _form = {
-		element: null,
-		showFields: function(title, fields, submit) {
-			_grid.element.hide();
-			_form.element.show();
-			_form.element.append($('<h4>').append(title));
-			$.each(fields, function(pos, field) {
-				var container = $('<div>')
-					.addClass('entry-field');
-				var label = $('<label>')
-					.append(field.label)
-					.appendTo(container);
-				if (field.required) {
-					label.append(' *')
-				}
-				var inputContainer = $('<div>')
-					.addClass('entry-field-input')
-					.appendTo(container);
-				switch (field.type) {
-					case 'text':
-					case 'number':
-						var input = $('<input>')
-							.attr('name', field.name)
-							.appendTo(inputContainer);
-						break;
-					case 'select':
-						var select = $('<select>')
-							.attr('name', field.name)
-							.appendTo(inputContainer);
-
-						for (var i = 0; i < field.options.length; i++) {
-							select.append($('<option>')
-								.append(field.options[i].text)
-								.val(field.options[i].value));
-						}
-						break;
-					case 'date':
-						var input = $('<input>')
-							.attr('name', field.name)
-							.appendTo(inputContainer)
-							.datepicker({
-								format: 'mm/dd/yyyy',
-								autoclose: true,
-								orientation: 'top',
-								startDate: new Date()
-							});
-						break;
-					case 'time':
-						var weeks = $('<div>')
-							.addClass('time-input')
-							.append($('<label>').append('Weeks'))
-							.append($('<div>')
-								.append($('<input>')
-									.attr('name', 'durWeeks')
-									.addClass('time-input')))
-							.appendTo(inputContainer);
-
-						var days = $('<div>')
-							.addClass('time-input')
-							.append($('<label>').append('Days'))
-							.append($('<div>')
-								.append($('<input>')
-									.attr('name', 'durDays')
-									.addClass('time-input')))
-							.appendTo(inputContainer);
-
-						var hours = $('<div>')
-							.addClass('time-input')
-							.append($('<label>').append('Hours'))
-							.append($('<div>')
-								.append($('<input>')
-									.attr('name', 'durHours')
-									.addClass('time-input')))
-							.appendTo(inputContainer);
-						break;
-					case 'check':
-						var checked = false;
-						var checkbox = $('<div>')
-							.addClass('checkbox-input')
-							.appendTo(inputContainer)
-							.click(function() {
-								checked = !checked;
-								if (checked) {
-									checkbox.addClass('checked');
-								} else {
-									checkbox.removeClass('checked');
-								}
-							});
-				}
-				_form.element.append(container);
-			});
-			var btnDone = $('<div>')
-				.addClass('form-new-submit')
-				.append($('<p>')
-					.append('Submit'))
-				.click(submit)
-				.appendTo(_form.element);
-		},
-		clear: function() {
-			_form.element.empty();
-			_form.element.hide();
-		}
-	}
 
 	var _colors = {
 		icon: {
@@ -269,33 +175,19 @@ var Index = (function() {
 	var _section = {
 		groups: {
 			active: null,
-			show: function() {
-				_form.clear();
-				_backButton.init(true, 'Menu', function() {
-					_menu.element.show();
-					_grid.element.hide();
-					_backButton.init(false);
-				});
-				_grid.element.show();
-			},
 			list: function() {
-				_section.groups.show();
 				API.groups.list(function(groups) {
 					if (groups) {
 						var icons = [];
 						$.each(groups, function(pos, group) {
 							icons.push(Common.icon({ name: group.name, color: _colors.icon.item }, function() {
-								_section.subgroups.list(group);
 								_section.groups.active = group;
+								_pages.push(_page.subgroups);
 							}));
 						});
 						icons.push(Common.icon({ name: 'New', color: _colors.icon.add }, function() {
-							_form.clear();
-							_backButton.init(true, 'Groups', _section.groups.show);
-							_form.showFields('New Group', _fields.group, _section.groups.submit);
+							_pages.push(_page.addGroup);
 						}));
-
-						_grid.clear();
 						_grid.populate(icons);
 					}
 				});
@@ -304,53 +196,33 @@ var Index = (function() {
 				var name = _form.element.find('input[name="name"]').val();
 				if (name.length === 0) return;
 				API.groups.add({ name: name }, function(err, id) {
-					_section.groups.show();
-					_section.groups.list();
+					_pages.pop();
 				});
 			},
 			remove: function() {
 				API.groups.remove({ id: _section.groups.active.id }, function(err) {
-					if (err) {
-						// do something
-					} else {
-						_section.groups.show();
-						_section.groups.list();
-					}
+					_pages.refresh();
 				});
 			}
 		},
 		subgroups: {
 			active: null,
-			backButtonSetup: function() {
-				_backButton.init(true, 'Groups', function() {
-					_section.groups.list();
-				});
-			},
-			show: function() {
-				_form.clear();
-				_section.subgroups.backButtonSetup();
-				_grid.element.show();
-			},
 			list: function(group) {
 				API.subgroups.list(group.id, function(subgroups) {
 					if (subgroups) {
 						var icons = [];
 						$.each(subgroups, function(pos, subgroup) {
 							icons.push(Common.icon({ name: subgroup.name, color: _colors.icon.item }, function() {
-								_section.products.list(subgroup);
 								_section.subgroups.active = subgroup;
+								_pages.push(_page.products, group.name);
 							}));
 						});
 						icons.push(Common.icon({ name: 'New', color: _colors.icon.add }, function() {
-							_form.clear();
-							_backButton.init(true, group.name, _section.subgroups.show);
-							_form.showFields('New ' + group.name, _fields.subgroup, _section.subgroups.submit);
+							_pages.push(_page.newSubgroup);
 						}));
 						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove }, function() {
 							_section.groups.remove();
 						}));
-						_grid.clear();
-						_section.subgroups.backButtonSetup();
 						_grid.populate(icons);
 					}
 				});
@@ -359,80 +231,38 @@ var Index = (function() {
 				var name = _form.element.find('input[name="name"]').val();
 				if (name.length === 0) return;
 				API.subgroups.add({ groupId: _section.groups.active.id, name: name }, function(err, id) {
-					_section.subgroups.show();
-					_section.subgroups.list(_section.groups.active);
+					_pages.pop();
 				});
 			},
 			remove: function() {
 				API.subgroups.remove({ id: _section.subgroups.active.id }, function(err) {
-					if (err) {
-						// do something
-					} else {
-						_section.subgroups.show();
-						_section.subgroups.list(_section.groups.active);
-					}
+					_pages.refresh();
 				});
 			}
 		},
 		products: {
 			active: null,
+			init: function() {
+				_backButton.init(_section.subgroups.active.name, _section.groups.show);
+			},
 			list: function(subgroup) {
 				API.products.list(subgroup.id, function(products) {
 					if (products) {
-						var backButtonSetup = function() {
-							_backButton.init(true, _section.groups.active.name, function() {
-								_section.subgroups.list(_section.groups.active);
-							});
-						};
 						var icons = [];
 						$.each(products, function(pos, product) {
 							icons.push(Common.icon({ name: product.name, color: _colors.icon.item }, function() {
 								_section.products.active = product;
-								_form.clear();
-
-								_backButton.init(true, subgroup.name, function() {
-									_form.clear();
-									backButtonSetup();
-									_grid.element.show();
-								});
-								API.units.get(product.unitId, function(unit) {
-									_form.showFields('Store ' + product.name, _fields.item(unit), function() {
-										_section.items.submit();
-									});
-								});
-								
+								_pages.push(_page.items, subgroup.name);
 							}));
 						});
 						icons.push(Common.icon({ name: 'New', color: _colors.icon.add }, function() {
-							_form.clear();
-							_backButton.init(true, subgroup.name, function() {
-								_form.clear();
-								backButtonSetup();
-								_grid.element.show();
-							});
-
-							var vals = {};
-							var valuesLoaded = function() {
-								_form.showFields('New ' + subgroup.name, _fields.product(vals.units, vals.stores), function() {
-									_section.products.submit();
-								});
-							};
-							API.units.list(function(units) {
-								vals.units = units;
-								if (vals.stores) valuesLoaded();
-							});
-							API.stores.list(function(stores) {
-								vals.stores = stores;
-								if (vals.units) valuesLoaded();
-							});
-
-							
+							_pages.push(_page.newProduct);
 						}));
 						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove }, function() {
 							_section.subgroups.remove();
+							_pages.refresh();
 						}));
 						_grid.clear();
-						backButtonSetup();
 						_grid.populate(icons);
 					}
 				});
@@ -479,9 +309,7 @@ var Index = (function() {
 						throw id.message;
 					}
 
-					_form.clear();
-					_grid.element.show();
-					_section.products.list(_section.subgroups.active);
+					_pages.pop();
 				});
 			}
 		},
@@ -503,13 +331,161 @@ var Index = (function() {
 						throw id.message;
 					}
 
-					_form.clear();
-					_grid.element.show(),
-					_section.groups.list()
+					_pages.pop();
 				});
 			}
 		}
 	}
+
+	var _page = {
+		menu: new Page({ 
+			backButton: {
+				text: 'Menu', 
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_menu.element.show();
+				_menu.addButton('Add Items', function() {
+					_pages.push(_page.groups);
+				});
+				_menu.addButton('List Items', function() {
+					_menu.element.hide();
+					_pages.push(_page.list);
+				});
+			},
+			cleanUp: function() {
+				_menu.element.hide();
+				_menu.clear();
+			}
+		}),
+		list: new Page({
+			backButton: {
+				text: 'Item List',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_list.show();
+				API.items.list(function(items) {
+					_list.refresh(items);
+				});
+			},
+			cleanUp: function() {
+				_list.hide();
+			}
+		}),
+		groups: new Page({
+			backButton: {
+				text: 'Groups',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_grid.element.show();
+				_section.groups.list();
+			},
+			cleanUp: function() {
+				_grid.element.hide();
+				_grid.clear();
+			}
+		}),
+		addGroup: new Page({
+			backButton: {
+				text: 'Add Group',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_form.showFields('New Group', _fields.group, _section.groups.submit);
+				_form.show();
+			},
+			cleanUp: function() {
+				_form.hide();
+			}
+		}),
+		subgroups: new Page({
+			backButton: {
+				text: 'Subgroups',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_grid.element.show();
+				_section.subgroups.list(_section.groups.active);
+			},
+			cleanUp: function() {
+				_grid.element.hide();
+				_grid.clear();
+			}
+		}),
+		addSubgroup: new Page({
+			backButton: {
+				text: 'Add Subgroup',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_form.showFields('New ' + _section.groups.name, _fields.subgroup, _section.subgroups.submit);
+				_form.show();
+			},
+			cleanUp: function() {
+				_form.hide();
+			}
+		}),
+		products: new Page({
+			backButton: {
+				text: 'Products',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				_grid.element.show();
+				_section.products.list(_section.subgroups.active);
+			},
+			cleanUp: function() {
+				_grid.element.hide();
+				_grid.clear();
+			}
+		}),
+		addProduct: new Page({
+			backButton: {
+				text: 'Add Product',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				var vals = {};
+				var valuesLoaded = function() {
+					_form.showFields('New ' + subgroup.name, _fields.product(vals.units, vals.stores), function() {
+						_section.products.submit();
+					});
+					_form.show();
+				};
+				API.units.list(function(units) {
+					vals.units = units;
+					if (vals.stores) valuesLoaded();
+				});
+				API.stores.list(function(stores) {
+					vals.stores = stores;
+					if (vals.units) valuesLoaded();
+				});
+			},
+			cleanUp: function() {
+				_form.hide();
+			}
+		}),
+		items: new Page({
+			backButton: {
+				text: 'Item',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				var product = _section.products.active;
+				API.units.get(product.unitId, function(unit) {
+					_form.showFields('Store ' + product.name, _fields.item(unit), function() {
+						_section.items.submit();
+					});
+					_form.show();
+				});
+			},
+			cleanUp: function() {
+				_form.hide();
+			}
+		})
+	};
 
 	return {
 		init: function() {
@@ -518,11 +494,12 @@ var Index = (function() {
 
 			_menu.element = $('.menu');
 			_grid.element = $('.grid');
-			_form.element = $('.form-new');
 
 			_list = new ItemList($('.list'));
+			_form = new Form($('.entry-form'));
+			_backButton = new BackButton($('.grid-back-container'));
 
-			_menu.init();
+			_pages.push(_page.menu);
 		}
 	}
 }());
