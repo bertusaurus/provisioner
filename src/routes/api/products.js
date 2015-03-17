@@ -62,9 +62,9 @@ module.exports = function(router, db) {
 		});
 	});
 
-	router.post('/products/remove/:id', function(req, res) {
+	router.post('/products/remove', function(req, res) {
 		res.setHeader('Content-Type', 'application/json');
-		db.products.remove(req.params.id)
+		db.products.remove(req.body.id)
 			.then(function() {
 				res.end();
 			})
@@ -72,7 +72,7 @@ module.exports = function(router, db) {
 				res.statusCode = 400;
 				return res.end(JSON.stringify({
 					message: err.detail
-				}));	
+				}));
 			});
 	});
 

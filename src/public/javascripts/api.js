@@ -87,6 +87,16 @@ var API = (function() {
 					data: params,
 					success: callback
 				});
+			},
+			remove: function(id, callback) {
+				$.ajax({
+					url: 'api/products/remove',
+					type: 'POST',
+					data: {
+						id: id
+					},
+					success: callback
+				});
 			}
 		},
 		units: {
@@ -123,6 +133,24 @@ var API = (function() {
 			list: function(callback) {
 				$.ajax({
 					url: 'api/items',
+					success: callback
+				});
+			},
+			edit: function(params, callback) {
+				$.ajax({
+					url: 'api/items/edit',
+					type: 'POST',
+					data: params,
+					success: callback
+				});
+			},
+			remove: function(id, callback) {
+				$.ajax({
+					url: 'api/items/remove',
+					type: 'POST',
+					data: {
+						id: id
+					},
 					success: callback
 				});
 			}

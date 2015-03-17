@@ -77,7 +77,10 @@ var Index = (function() {
 		icon: {
 			item: 'rgb(190, 202, 223)',
 			add: 'rgb(197, 223, 190)',
-			remove: 'rgb(223, 190, 190)'
+			remove: {
+				default: 'rgb(223, 190, 190)',
+				hover: 'rgb(242, 228, 228)'
+			}
 		}
 	};
 
@@ -154,19 +157,21 @@ var Index = (function() {
 
 			return fields;
 		},
-		item: function(unit) {
+		item: function(unit, quantity, expiry) {
 			return [
 				{
 					name: 'quantity',
 					label: 'Quantity (' + unit.abbreviation + ')',
 					type: 'number',
-					required: true
+					required: true,
+					value: quantity ? quantity : ''
 				},
 				{
 					name: 'expiry',
 					label: 'Expiry / Best Before',
 					type: 'date',
-					required: false
+					required: false,
+					value: expiry ? moment(expiry).format('MM/DD/YYYY') : ''
 				}
 			];
 		}
@@ -220,7 +225,7 @@ var Index = (function() {
 						icons.push(Common.icon({ name: 'New', color: _colors.icon.add }, function() {
 							_pages.push(_page.newSubgroup);
 						}));
-						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove }, function() {
+						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove.default }, function() {
 							_section.groups.remove();
 						}));
 						_grid.populate(icons);
@@ -256,9 +261,9 @@ var Index = (function() {
 							}));
 						});
 						icons.push(Common.icon({ name: 'New', color: _colors.icon.add }, function() {
-							_pages.push(_page.newProduct);
+							_pages.push(_page.addProduct);
 						}));
-						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove }, function() {
+						icons.push(Common.icon({ name: 'Remove', color: _colors.icon.remove.default }, function() {
 							_section.subgroups.remove();
 							_pages.refresh();
 						}));
@@ -373,6 +378,56 @@ var Index = (function() {
 				_list.hide();
 			}
 		}),
+		editItem: new Page({
+			backButton: {
+				text: 'Modify Item',
+				action: _pages.pop
+			},
+			pageInit: function() {
+				var item = _list.selectedItem;
+				_form.showFields('Edit ' + item.name, _fields.item({ abbreviation: item.unit }, item.amount, item.expiry), function() {
+					var quantity = _form.element.find('input[name="quantity"]').val();
+					var expiry = _form.element.find('input[name="expiry"]').val();
+
+					if (quantity.length === 0) return;
+					if (expiry.length === 0) expiry = null;
+
+					API.items.edit({
+						id: item.id,
+						productId: item.productId,
+						amount: quantity,
+						storeDate:  moment().format(),
+						expiry:  expiry ? moment(expiry).format() : null
+					}, function(err) {
+						if (err && err.message) {
+							console.log(err.message);
+						} else {
+							_pages.pop();
+						}
+					});
+				},
+				[{
+					text: 'Take All',
+					click: function() {
+						API.items.remove(item.id, function(err) {
+							if (err && err.message) {
+								console.log(err);
+							} else {
+								_pages.pop();
+							}
+						})
+					},
+					colors: {
+						default: _colors.icon.remove.default,
+						hover: _colors.icon.remove.hover,
+					}
+				}]);
+				_form.show();
+			},
+			cleanUp: function() {
+				_form.hide();
+			}
+		}),
 		groups: new Page({
 			backButton: {
 				text: 'Groups',
@@ -449,7 +504,7 @@ var Index = (function() {
 			pageInit: function() {
 				var vals = {};
 				var valuesLoaded = function() {
-					_form.showFields('New ' + subgroup.name, _fields.product(vals.units, vals.stores), function() {
+					_form.showFields('New ' + _section.subgroups.active.name, _fields.product(vals.units, vals.stores), function() {
 						_section.products.submit();
 					});
 					_form.show();
@@ -477,7 +532,23 @@ var Index = (function() {
 				API.units.get(product.unitId, function(unit) {
 					_form.showFields('Store ' + product.name, _fields.item(unit), function() {
 						_section.items.submit();
-					});
+					},
+					[{
+						text: 'Remove ' + product.name,
+						click: function() {
+							API.products.remove(product.id, function(result) {
+								if (result && result.message) {
+									console.log(result.message);
+								} else {
+									_pages.pop();
+								}
+							})
+						},
+						colors: {
+							default: _colors.icon.remove.default,
+							hover: _colors.icon.remove.hover,
+						}
+					}]);
 					_form.show();
 				});
 			},
@@ -495,7 +566,11 @@ var Index = (function() {
 			_menu.element = $('.menu');
 			_grid.element = $('.grid');
 
-			_list = new ItemList($('.list'));
+			_list = new ItemList($('.list'), function(item) {
+				_list.selectedItem = item;
+				_pages.push(_page.editItem);
+				console.log(item);
+			});
 			_form = new Form($('.entry-form'));
 			_backButton = new BackButton($('.grid-back-container'));
 

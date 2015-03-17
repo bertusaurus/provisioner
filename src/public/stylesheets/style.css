@@ -39,7 +39,7 @@
 	margin: 40px 0 0 40px;
 }
 
-.grid-icon, .grid-back, .entry-form-submit, .menu-item, .action-button {
+.grid-icon, .grid-back, .entry-form-submit, .entry-form-other, .menu-item, .action-button {
 	position: relative;
 	border: 2px solid #000;
 	border-radius: 6px;
@@ -62,7 +62,7 @@
 	background-color: #3CDB3C;
 }
 
-.grid-icon p, .grid-back p, .entry-form-submit p, .menu-item p {
+.grid-icon p, .grid-back p, .entry-form-submit p, .entry-form-other p, .menu-item p {
 	position: absolute;
 	width: 100%;
 	font-size: 14px;
@@ -115,12 +115,16 @@ form.entry-form {
 	text-align: center;
 }
 
-.entry-form-submit {
+.entry-form-submit, .entry-form-other {
 	height: 64px;
+	margin-bottom: 10px;
+}
+
+.entry-form-submit {
 	background-color: rgb(197, 223, 190);
 }
 
-.entry-form-submit p {
+.entry-form-submit p, .entry-form-other p {
 	height: 100%;
 	line-height: 64px;
 }

@@ -10,7 +10,7 @@ var Form = function(element) {
 			hide: function() {
 				_element.hide();
 			},
-			showFields: function(title, fields, submit) {
+			showFields: function(title, fields, submit, otherButtons) {
 				_element.empty();
 				_element.append($('<h4>').append(title));
 				$.each(fields, function(pos, field) {
@@ -31,6 +31,9 @@ var Form = function(element) {
 							var input = $('<input>')
 								.attr('name', field.name)
 								.appendTo(inputContainer);
+							if (field.value) {
+								input.val(field.value);
+							}
 							break;
 						case 'select':
 							var select = $('<select>')
@@ -53,6 +56,10 @@ var Form = function(element) {
 									orientation: 'top',
 									startDate: new Date()
 								});
+							if (field.value) {
+								console.log(field.value);
+								input.val(field.value);
+							}
 							break;
 						case 'time':
 							var weeks = $('<div>')
@@ -104,6 +111,29 @@ var Form = function(element) {
 						.append('Submit'))
 					.click(submit)
 					.appendTo(_element);
+
+				if (otherButtons) {
+					_.each(otherButtons, function(button) {
+						_element.append($('<div>')
+							.addClass('entry-form-other')
+							.append($('<p>')
+								.append(button.text))
+							.click(button.click)
+							.css('background-color', button.colors.default)
+							.hover(function(e) {
+								$(this).css('background-color', button.colors.hover);
+							},
+							function(e) {
+								$(this).css('background-color', button.colors.default);
+							})
+							.mousedown(function() {
+								$(this).css('background-color', button.colors.active);
+							})
+							.mouseup(function() {
+								$(this).css('background-color', button.colors.default);
+							}));
+					});
+				}
 			}
 		};
 	}());

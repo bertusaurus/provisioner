@@ -1,4 +1,4 @@
-var ItemList = function(element) {
+var ItemList = function(element, modifyItem) {
 	return (function() {
 		var _element = element;
 		var _form = new Form($('.entry-form'));
@@ -34,6 +34,7 @@ var ItemList = function(element) {
 					show();
 				}
 			},
+			selectedItem: null,
 			refresh: function(allItems) {
 				_element.empty();
 				var groups = _.uniq(_.pluck(allItems, 'group'));
@@ -82,17 +83,7 @@ var ItemList = function(element) {
 								.addClass('action-button')
 									.append('Modify'))
 								.click(function() {
-									_element.hide();
-									var itemModify = new ItemModify({
-										element: $('.item-modify'),
-										item: item,
-										form: _form
-									});
-									_backButton.init('Item List', function() {
-										itemModify.remove();
-										_element.show();
-									});
-									itemModify.show();
+									modifyItem(item);
 								}));
 							table.append(row);
 						});

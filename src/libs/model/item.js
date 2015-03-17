@@ -31,7 +31,8 @@ var container = (function() {
 			return _knex
 				.select('group.name as group', 
 					'subgroup.name as subgroup',
-					'product.name', 
+					'product.name',
+					'product.id as productId',
 					'item.id',
 					'item.amount',
 					'item.expiry',
